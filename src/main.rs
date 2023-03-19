@@ -1,26 +1,31 @@
 // This code is inspired from https://opensource.com/article/22/11/rust-calls-c-library-functions
-use std::os::raw::{c_int, c_double};
+mod mytime;
+use mytime::*;
+use std::ffi::CStr;
 
+fn main () {
+    let mut sometime = StructTM {
+        tm_year: 1,
+        tm_mon: 1,
+        tm_mday: 1,
+        tm_hour: 1,
+        tm_min: 1,
+        tm_sec: 1,
+        tm_isdst: -1,
+        tm_wday: 1,
+        tm_yday: 1,
+    };
 
-// Import three functions from the standard library libc.
-// Here are the Rust declarations for the C functions.
-extern "C" {
-    fn abs(num: c_int) -> c_int;
-    fn sqrt(num: c_double) -> c_double;
-    fn pow(num: c_double, power: c_double) -> c_double;
-}
+    unsafe {
+        let c_ptr = &mut sometime; // Raw pointer
 
-fn main() {
-    let x: i32 = -123;
-    println!("\nAbsolute value of {x}: {}.", unsafe { abs(x) });
+        // Make the call, convert and then own
+        // the returned C string
+        let char_ptr = asctime(c_ptr);
+        let c_str = CStr::from_ptr(char_ptr);
+        println!("{:#?}", c_str.to_str());
 
-    let n: f64 = 9.0;
-    let p: f64 = 3.0;
-    println!("\n{n} raised to {p}: {}.", unsafe { pow(n, p) });
-
-    let mut y: f64 = 64.0;
-    println!("\nSquare root of {y}: {}.", unsafe { sqrt(y) });
-
-    y = -3.14;
-    println!("\nSquare root of {y}: {}.", unsafe { sqrt(y) });
+        let utc = mktime(c_ptr);
+        println!("{}", utc);
+    }
 }
