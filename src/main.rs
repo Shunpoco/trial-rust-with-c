@@ -3,7 +3,12 @@ mod mytime;
 use mytime::*;
 use std::ffi::CStr;
 
+use std::env;
+
 fn main () {
+    for args in env::args() {
+        println!("{args}");
+    }
     let mut sometime = StructTM {
         tm_year: 1,
         tm_mon: 1,
